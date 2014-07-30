@@ -6,8 +6,6 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Random;
 
 import javax.swing.JFrame;
@@ -29,7 +27,7 @@ public class TicTacToe extends JPanel {
 	public TicTacToe() {
 		addMouseListener(new MouseAdapter() {
 			@Override
-			public void mouseClicked(MouseEvent event) {
+			public void mousePressed(MouseEvent event) {
 				Dimension dim = getSize();
 
 				Point p = event.getPoint();
@@ -82,19 +80,77 @@ public class TicTacToe extends JPanel {
 		return true;
 	}
 
+	private int winner() {
+		for (int i = 0; i < 3; i++) {
+			if (data[i][0] == data[i][1] && data[i][0] == data[i][2]
+					&& data[i][0] != 0)
+				return data[i][0];
+			if (data[0][i] == data[1][i] && data[0][i] == data[2][i]
+					&& data[0][i] != 0)
+				return data[0][i];
+		}
+		if (data[0][0] == data[1][1] && data[0][0] == data[2][2]
+				&& data[0][0] != 0)
+			return data[0][0];
+		if (data[0][2] == data[1][1] && data[0][2] == data[2][0]
+				&& data[0][2] != 0)
+			return data[0][2];
+
+		return 0;
+	}
+
 	Random r = new Random();
 
+	static class Score {
+		Point move;
+		int score;
+
+		public Score(Point move, int score) {
+			this.move = move;
+			this.score = score;
+		}
+	};
+
 	private void aiMove() {
-		List<Point> emptyCells = new ArrayList<Point>();
+		Score s = minimax(null, true);
+		data[s.move.x][s.move.y] = COMPUTER;
+	}
+
+	private Score minimax(Point move, final boolean maximizing) {
+		//dump();
+		if (gameEnd()) {
+			//System.out.println("winner: " + winner());
+			return new Score(move, score());
+		}
+		Score best = new Score(null, maximizing? -10 : 10);
+		
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
 				if (data[i][j] == 0) {
-					emptyCells.add(new Point(i, j));
+					Point child = new Point(i, j);
+					data[i][j] = maximizing ? COMPUTER : YOU;
+					Score score = minimax(child, !maximizing);
+					if (maximizing && score.score > best.score) {
+						best.score = score.score;
+						best.move = child;
+					} else if (!maximizing && score.score < best.score) {
+						best.score = score.score;
+						best.move = child;
+					}
+					data[i][j] = 0;
 				}
 			}
 		}
-		Point p = emptyCells.get(r.nextInt(emptyCells.size()));
-		data[p.x][p.y] = COMPUTER;
+		return best;
+	}
+
+	private int score() {
+		int winner = winner();
+		if (winner == COMPUTER)
+			return 1;
+		if (winner == YOU)
+			return -1;
+		return 0;
 	}
 
 	@Override
