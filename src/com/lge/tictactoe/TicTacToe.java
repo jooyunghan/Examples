@@ -1,10 +1,14 @@
 package com.lge.tictactoe;
 
+import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.FontMetrics;
 import java.awt.Graphics;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.geom.Rectangle2D;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Random;
 
@@ -117,13 +121,13 @@ public class TicTacToe extends JPanel {
 	}
 
 	private Score minimax(Point move, final boolean maximizing) {
-		//dump();
+		// dump();
 		if (gameEnd()) {
-			//System.out.println("winner: " + winner());
+			// System.out.println("winner: " + winner());
 			return new Score(move, score());
 		}
-		Score best = new Score(null, maximizing? -10 : 10);
-		
+		Score best = new Score(null, maximizing ? -10 : 10);
+
 		for (int i = 0; i < 3; i++) {
 			for (int j = 0; j < 3; j++) {
 				if (data[i][j] == 0) {
@@ -191,6 +195,24 @@ public class TicTacToe extends JPanel {
 							* height / 3 + height / 10);
 				}
 			}
+		}
+
+		// show status
+		if (gameEnd()) {
+			g.setFont(new Font(Font.SERIF, Font.BOLD | Font.ITALIC, 40));
+			int winner = winner();
+			String message = "DRAW";
+			if (winner == COMPUTER) {
+				g.setColor(Color.red);
+				message = "YOU LOST";
+			} else if (winner == YOU) {
+				g.setColor(Color.green);
+				message = "YOU WON";
+			}
+			FontMetrics fontMetrics = g.getFontMetrics();
+			Rectangle2D bounds = fontMetrics.getStringBounds(message, g);
+			g.drawString(message, (int) ((width - bounds.getWidth()) / 2),
+					height / 2 + fontMetrics.getAscent() / 2);
 		}
 	}
 
