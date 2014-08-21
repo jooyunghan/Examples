@@ -45,17 +45,20 @@ class BoardGame implements GameTree<Point> {
 		turn = 0;
 	}
 
-	public void humanMove(Point p) {
+	public void tryMove(Point p) {
 		if (end())
 			return;
 		if (outOfBoard(p))
 			return;
 		if (!cellEmpty(p))
 			return;
-
-		move(p);
-		if (!end() && players[turn].auto()) {
-			move(players[turn].move(this));
+		
+		while (!end()) {
+			if (players[turn].auto()) {
+				move(players[turn].move(this));
+			} else {
+				move(p);
+			}
 		}
 	}
 

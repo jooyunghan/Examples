@@ -33,7 +33,7 @@ public class BoardGamePanel extends JPanel {
 				if (game.end()) {
 					game.init();
 				} else {
-					game.humanMove(toBoardPosition(event.getPoint()));
+					game.tryMove(toBoardPosition(event.getPoint()));
 				}
 				repaint();
 			}
