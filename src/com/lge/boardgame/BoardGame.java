@@ -48,8 +48,6 @@ class BoardGame implements GameTree<Point> {
 	public void tryMove(Point p) {
 		if (end())
 			return;
-		if (outOfBoard(p))
-			return;
 		if (!cellEmpty(p))
 			return;
 		
@@ -57,7 +55,10 @@ class BoardGame implements GameTree<Point> {
 			if (players[turn].auto()) {
 				move(players[turn].move(this));
 			} else {
+                if (outOfBoard(p))
+                    return;
 				move(p);
+                p = new Point(-1, -1);
 			}
 		}
 	}

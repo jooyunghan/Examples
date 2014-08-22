@@ -7,7 +7,7 @@ public class Drawers {
 	static Drawer whiteO = filledO(Color.white);
 	static Drawer blackO = filledO(Color.black);
 
-	private static Drawer filledO(final Color color) {
+	public static Drawer filledO(final Color color) {
 		return new Drawer() {
 			@Override
 			public void draw(Graphics g, Rect r) {
