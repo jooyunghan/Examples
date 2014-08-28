@@ -19,7 +19,7 @@ public class BoardGamePanel extends JPanel {
 	private static final long serialVersionUID = 1L;
 
 	private final int size;
-	private final BoardGame game;
+	private BoardGame game;
 
 	private BoardDrawer drawer;
 
@@ -49,9 +49,10 @@ public class BoardGamePanel extends JPanel {
 
 		for (int i = 0; i < size; i++) {
 			for (int j = 0; j < size; j++) {
-				if (game.data[i][j] != -1) {
+				int player = game.get(i, j);
+				if (player != -1) {
 					Rect r = toRect(dim.width, dim.height, i, j);
-					drawer.drawPlayer(g, game.data[i][j], r);
+					drawer.drawPlayer(g, player, r);
 				}
 			}
 		}

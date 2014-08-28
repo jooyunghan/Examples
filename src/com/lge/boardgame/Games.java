@@ -8,7 +8,7 @@ public class Games {
 
 	public static BoardGamePanel tictactoe() {
 		int size = 3;
-		BoardGame game = new BoardGame(size, size, new HumanPlayer(),
+		MakeLineGame game = new MakeLineGame(size, size, new HumanPlayer(),
 				new ComputerPlayer(new MinimaxAi()));
 		BoardDrawer drawer = new BoardDrawer(Drawers.grid(size),
 				Drawers.whiteO, Drawers.X);
@@ -17,7 +17,7 @@ public class Games {
 
 	public static BoardGamePanel omok() {
 		int size = 19;
-		BoardGame game = new BoardGame(size, 5,
+		MakeLineGame game = new MakeLineGame(size, 5,
 				new ComputerPlayer(new RandomAi()),
 				new ComputerPlayer(new RandomAi()),
 				new ComputerPlayer(new RandomAi()));
