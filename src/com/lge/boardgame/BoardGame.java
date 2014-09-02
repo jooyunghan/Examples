@@ -9,7 +9,7 @@ public interface BoardGame {
 
     void init();
 
-    void tryMove(Point boardPosition);
+    void tryMove(Point boardPosition, Clicker c);
 
     int get(int i, int j);
 

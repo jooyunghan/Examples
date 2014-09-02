@@ -48,7 +48,7 @@ class MakeLineGame implements GameTree<Point>, BoardGame {
 		turn = 0;
 	}
 
-	public void tryMove(Point p) {
+	public void tryMove(Point p, Clicker c) {
 		if (end())
 			return;
 		if (!cellEmpty(p))

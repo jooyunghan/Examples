@@ -9,8 +9,12 @@ import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.geom.Rectangle2D;
+import java.lang.reflect.InvocationTargetException;
+import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.LinkedBlockingDeque;
 
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 
 public class BoardGamePanel extends JPanel {
     /**
@@ -23,6 +27,47 @@ public class BoardGamePanel extends JPanel {
 
     private BoardDrawer drawer;
 
+    private BlockingQueue<Point> clicks = new LinkedBlockingDeque<>();
+
+    class ClickerThread extends Thread implements Clicker {
+
+        @Override
+        public void click(Point p, Clicker self) {
+            try {
+                clicks.put(p);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void run() {
+            while (true) {
+                try {
+                    final Point take = clicks.take();
+                    Thread.sleep(200);
+                    SwingUtilities.invokeAndWait(new Runnable() {
+                        @Override
+                        public void run() {
+                            game.tryMove(take, clicker);
+                            repaint();
+                        }
+                    });
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                } catch (InvocationTargetException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
+
+    }
+
+    private ClickerThread clicker = new ClickerThread();
+    {
+        clicker.start();
+    }
+
     public BoardGamePanel(final BoardGame game, BoardDrawer drawer) {
         this.game = game;
         this.drawer = drawer;
@@ -33,7 +78,7 @@ public class BoardGamePanel extends JPanel {
                 if (game.end()) {
                     game.init();
                 } else {
-                    game.tryMove(toBoardPosition(event.getPoint()));
+                    game.tryMove(toBoardPosition(event.getPoint()), clicker);
                 }
                 repaint();
             }

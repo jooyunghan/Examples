@@ -68,7 +68,7 @@ public class AtaxxGame implements BoardGame, GameTree<Move> {
     }
 
     @Override
-    public void tryMove(Point p) {
+    public void tryMove(Point p, Clicker c) {
         if (selected == null) {
             if (get(p) == turn && !nextMoves(p).isEmpty()) {
                 selected = p;
@@ -77,7 +77,7 @@ public class AtaxxGame implements BoardGame, GameTree<Move> {
             if (nextMoves(selected).contains(p)) {
                 move(selected, p);
                 selected = null;
-                runAuto();
+                runAuto(c);
             } else if (get(p) == turn && !nextMoves(p).isEmpty()) {
                 selected = p;
             } else {
@@ -86,13 +86,18 @@ public class AtaxxGame implements BoardGame, GameTree<Move> {
         }
     }
 
-    private void runAuto() {
-        while (players[turn].auto() && !end()) {
-            Move m = players[turn].move(this);
-            if (m != null)
-                move(m.from, m.to);
-            else
+    private void runAuto(Clicker c) {
+        while (!end()) {
+            if (nextMoves().isEmpty()) {
                 turn = (turn + 1) % players.length;
+            } else if (players[turn].auto()) { // ai with nextMoves, click automatically
+                Move m = players[turn].move(this);
+                c.click(m.from, c);
+                c.click(m.to, c);
+                break;
+            } else { // human with nextMoves, then wait for input
+                break;
+            }
         }
     }
 
@@ -167,15 +172,15 @@ public class AtaxxGame implements BoardGame, GameTree<Move> {
     @Override
     public int winner() {
         int[] count = new int[players.length];
-        for (int i=0; i<size; i++) {
-            for (int j=0; j<size; j++) {
-                if (data[i][j] != -1) 
+        for (int i = 0; i < size; i++) {
+            for (int j = 0; j < size; j++) {
+                if (data[i][j] != -1)
                     count[data[i][j]]++;
             }
         }
         int winner = -1;
         int maxCount = 0;
-        for (int i=0; i<count.length; i++) {
+        for (int i = 0; i < count.length; i++) {
             if (maxCount < count[i]) {
                 maxCount = count[i];
                 winner = i;

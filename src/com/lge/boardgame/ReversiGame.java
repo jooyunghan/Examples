@@ -82,7 +82,7 @@ public class ReversiGame implements GameTree<Point>, BoardGame {
         return nextMoves(0).isEmpty() && nextMoves(1).isEmpty();
     }
 
-    public void tryMove(Point p) {
+    public void tryMove(Point p, Clicker c) {
         List<Point> moves = nextMoves(turn);
         if (moves.isEmpty() && !nextMoves(1).isEmpty()) {
             // move(players[1].move(this));
