@@ -2,6 +2,7 @@ package com.lge.boardgame;
 
 import java.awt.Point;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 class MakeLineGame implements GameTree<Point>, BoardGame {
@@ -140,5 +141,10 @@ class MakeLineGame implements GameTree<Point>, BoardGame {
 		turn = data[move.x][move.y];
 		data[move.x][move.y] = -1;
 	}
+
+    @Override
+    public List<Point> selected() {
+        return Collections.<Point>emptyList();
+    }
 
 }

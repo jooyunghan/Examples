@@ -16,7 +16,7 @@ public class Main {
             @Override
             public void run() {
                 JFrame frame = new JFrame("BoardGame");
-                frame.add(Games.reversi(4));
+                frame.add(Games.ataxx());
                 frame.setSize(new Dimension(600, 600));
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setVisible(true);

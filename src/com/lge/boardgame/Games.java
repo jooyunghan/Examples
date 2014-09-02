@@ -35,4 +35,15 @@ public class Games {
         return panel;
     }
 
+    public static Component ataxx() {
+        int size = 8;
+        return new BoardGamePanel(new AtaxxGame(size, 
+                new HumanPlayer(),
+          //      new HumanPlayer()
+        // , new HumanPlayer()
+         new ComputerPlayer(new RandomAi())
+        ), new BoardDrawer(Drawers.grid(size),
+                Drawers.filledO(Color.blue), Drawers.filledO(Color.red),
+                Drawers.filledO(Color.green), Drawers.filledO(Color.yellow)));
+    }
 }

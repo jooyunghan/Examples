@@ -1,19 +1,22 @@
 package com.lge.boardgame;
 
 import java.awt.Point;
+import java.util.List;
 
 public interface BoardGame {
 
-	boolean end();
+    boolean end();
 
-	void init();
+    void init();
 
-	void tryMove(Point boardPosition);
+    void tryMove(Point boardPosition);
 
-	int get(int i, int j);
+    int get(int i, int j);
 
-	int getSize();
+    int getSize();
 
-	int winner();
+    int winner();
+
+    List<Point> selected();
 
 }
