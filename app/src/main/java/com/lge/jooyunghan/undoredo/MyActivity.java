@@ -1,185 +1,29 @@
 package com.lge.jooyunghan.undoredo;
 
 import android.app.Activity;
-import android.graphics.Color;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.MotionEvent;
-import android.view.View;
-import android.widget.Button;
-import android.widget.FrameLayout;
-import android.widget.RadioGroup;
 
-import java.util.ArrayList;
 
 public class MyActivity extends Activity {
-
-    private static final int CIRCLE = 1;
-    private static final int SQUARE = 2;
-    private static final int ERASURE = 3;
-    private final static int SIZE = 30;
-    private FrameLayout canvas;
-    private Button redoButton;
-    private Button undoButton;
-    private RadioGroup radioGroup;
-    private int tool;
-    private int hotX;
-    private int hotY;
-    private ArrayList<Command> commands = new ArrayList<Command>();
-    private int position = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_my);
-        canvas = (FrameLayout) findViewById(R.id.canvas);
-        undoButton = (Button) findViewById(R.id.button_undo);
-        undoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                undo();
-            }
-        });
-        undoButton.setEnabled(false);
-        redoButton = (Button) findViewById(R.id.button_redo);
-        redoButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                redo();
-            }
-        });
-        redoButton.setEnabled(false);
-        radioGroup = (RadioGroup) findViewById(R.id.radioGroup);
-        radioGroup.check(R.id.circle);
-        tool = CIRCLE;
-
-        radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
-            @Override
-            public void onCheckedChanged(RadioGroup group, int checkedId) {
-                if (checkedId == R.id.circle) {
-                    tool = CIRCLE;
-                } else if (checkedId == R.id.square) {
-                    tool = SQUARE;
-                } else {
-                    tool = ERASURE;
-                }
-            }
-        });
-
-        canvas.setOnTouchListener(new View.OnTouchListener() {
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                float x = event.getX();
-                float y = event.getY();
-                hotX = (int) x;
-                hotY = (int) y;
-                return false;
-            }
-        });
-        canvas.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Command command = getCommand(tool, hotX, hotY);
-                if (command != null) {
-                    doCommand(command);
-                }
-            }
-        });
-    }
-
-    private void doCommand(Command command) {
-        while (commands.size() > position) {
-            commands.remove(position);
-        }
-        commands.add(command);
-        position++;
-        command.execute();
-        undoButton.setEnabled(true);
-        redoButton.setEnabled(false);
-    }
-
-    private void undo() {
-        position--;
-        Command command = commands.get(position);
-        command.undo();
-        redoButton.setEnabled(true);
-        if (position == 0)
-            undoButton.setEnabled(false);
-    }
-
-    private void redo() {
-        Command command = commands.get(position);
-        command.execute();
-        position++;
-        undoButton.setEnabled(true);
-        if (position >= commands.size())
-            redoButton.setEnabled(false);
-    }
-
-    private Command getCommand(int tool, int x, int y) {
-        if (tool == CIRCLE) {
-            final View v = new View(this);
-            v.setLayoutParams(new FrameLayout.LayoutParams(SIZE, SIZE));
-            v.setBackgroundColor(Color.BLUE);
-            v.setX(x - SIZE / 2);
-            v.setY(y - SIZE / 2);
-            return new Command() {
-                @Override
-                public void execute() {
-                    canvas.addView(v);
-                }
-                @Override
-                public void undo() {
-                    canvas.removeView(v);
-                }
-            };
-        } else if (tool == SQUARE) {
-            final View v = new View(this);
-            v.setLayoutParams(new FrameLayout.LayoutParams(SIZE, SIZE));
-            v.setBackgroundColor(Color.RED);
-            v.setX(x - SIZE / 2);
-            v.setY(y - SIZE / 2);
-            return new Command() {
-                @Override
-                public void execute() {
-                    canvas.addView(v);
-                }
-                @Override
-                public void undo() {
-                    canvas.removeView(v);
-                }
-            };
-        } else { // erasure
-            int count = canvas.getChildCount();
-            Rect rect = new Rect();
-
-            for (int i = 0; i < count; i++) {
-                final View childAt = canvas.getChildAt(i);
-                childAt.getHitRect(rect);
-                rect.inset(-30, -30);
-                if (rect.contains(x, y)) {
-                    return new Command() {
-                        @Override
-                        public void execute() {
-                            canvas.removeView(childAt);
-                        }
-                        @Override
-                        public void undo() {
-                            canvas.addView(childAt);
-                        }
-                    };
-                }
-            }
-            return null;
+        setContentView(R.layout.my_activity);
+        if (savedInstanceState == null) {
+            getFragmentManager().beginTransaction()
+                    .add(R.id.container, new MyFragment())
+                    .commit();
         }
     }
+
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.my, menu);
+        getMenuInflater().inflate(R.menu.my_activity2, menu);
         return true;
     }
 
@@ -194,4 +38,5 @@ public class MyActivity extends Activity {
         }
         return super.onOptionsItemSelected(item);
     }
+
 }
