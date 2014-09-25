@@ -14,7 +14,6 @@ import android.widget.RadioGroup;
 
 import java.util.ArrayList;
 
-
 public class MyActivity extends Activity {
 
     private static final int CIRCLE = 1;
@@ -83,28 +82,11 @@ public class MyActivity extends Activity {
             @Override
             public void onClick(View v) {
                 Command command = getCommand(tool, hotX, hotY);
-                if (command != null)
+                if (command != null) {
                     doCommand(command);
-            }
-        });
-    }
-
-    private Command getCommand(int tool, int x, int y) {
-        if (tool == ERASURE) {
-            int count = canvas.getChildCount();
-            Rect rect = new Rect();
-            for (int i = 0; i < count; i++) {
-                final View childAt = canvas.getChildAt(i);
-                childAt.getHitRect(rect);
-                rect.inset(-30, -30);
-                if (rect.contains(x, y)) {
-                    return new Command(tool, x, y);
                 }
             }
-            return null;
-        } else {
-            return new Command(tool, x, y);
-        }
+        });
     }
 
     private void doCommand(Command command) {
@@ -136,17 +118,20 @@ public class MyActivity extends Activity {
             redoButton.setEnabled(false);
     }
 
-    private Runnable doAction(int tool, int x, int y) {
+    private Command getCommand(int tool, int x, int y) {
         if (tool == CIRCLE) {
             final View v = new View(this);
             v.setLayoutParams(new FrameLayout.LayoutParams(SIZE, SIZE));
             v.setBackgroundColor(Color.BLUE);
             v.setX(x - SIZE / 2);
             v.setY(y - SIZE / 2);
-            canvas.addView(v);
-            return new Runnable() {
+            return new Command() {
                 @Override
-                public void run() {
+                public void execute() {
+                    canvas.addView(v);
+                }
+                @Override
+                public void undo() {
                     canvas.removeView(v);
                 }
             };
@@ -156,10 +141,13 @@ public class MyActivity extends Activity {
             v.setBackgroundColor(Color.RED);
             v.setX(x - SIZE / 2);
             v.setY(y - SIZE / 2);
-            canvas.addView(v);
-            return new Runnable() {
+            return new Command() {
                 @Override
-                public void run() {
+                public void execute() {
+                    canvas.addView(v);
+                }
+                @Override
+                public void undo() {
                     canvas.removeView(v);
                 }
             };
@@ -172,11 +160,13 @@ public class MyActivity extends Activity {
                 childAt.getHitRect(rect);
                 rect.inset(-30, -30);
                 if (rect.contains(x, y)) {
-                    canvas.removeViewAt(i);
-                    return new Runnable() {
-
+                    return new Command() {
                         @Override
-                        public void run() {
+                        public void execute() {
+                            canvas.removeView(childAt);
+                        }
+                        @Override
+                        public void undo() {
                             canvas.addView(childAt);
                         }
                     };
@@ -203,27 +193,5 @@ public class MyActivity extends Activity {
             return true;
         }
         return super.onOptionsItemSelected(item);
-    }
-
-    class Command {
-
-        private final int tool;
-        private final int x;
-        private final int y;
-        private Runnable undo;
-
-        Command(int tool, int x, int y) {
-            this.tool = tool;
-            this.x = x;
-            this.y = y;
-        }
-
-        public void execute() {
-            undo = doAction(tool, x, y);
-        }
-
-        public void undo() {
-            undo.run();
-        }
     }
 }
