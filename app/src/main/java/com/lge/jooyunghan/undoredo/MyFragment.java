@@ -2,9 +2,7 @@ package com.lge.jooyunghan.undoredo;
 
 import android.app.Fragment;
 import android.graphics.Color;
-import android.graphics.Rect;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -13,25 +11,22 @@ import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.RadioGroup;
 
-import java.util.ArrayList;
-
 /**
  * A placeholder fragment containing a simple view.
  */
 public class MyFragment extends Fragment {
     private static final int CIRCLE = 1;
     private static final int SQUARE = 2;
-    private static final int ERASURE = 3;
-    private final static int SIZE = 30;
+    private static final int ERASER = 3;
+    private final static int SIZE = 100;
     private FrameLayout canvas;
-    private Button redoButton;
-    private Button undoButton;
     private RadioGroup radioGroup;
-    private int tool;
+    private int tool = CIRCLE;
     private int hotX;
     private int hotY;
-    private ArrayList<Command> commands = new ArrayList<Command>();
-    private int position = 0;
+
+    private final UndoRedo undoRedo = new UndoRedo();
+    private final Shapes shapes = new Shapes();
 
     public MyFragment() {
     }
@@ -40,35 +35,33 @@ public class MyFragment extends Fragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
-        Log.d("jhan", "onCreate");
     }
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
-        Log.d("jhan", "onCreateView");
+                             Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.my_fragment, container, false);
         canvas = (FrameLayout) rootView.findViewById(R.id.canvas);
-        undoButton = (Button) rootView.findViewById(R.id.button_undo);
+        Button undoButton = (Button) rootView.findViewById(R.id.button_undo);
         undoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                undo();
+                undoRedo.undo();
             }
         });
-        undoButton.setEnabled(false);
-        redoButton = (Button) rootView.findViewById(R.id.button_redo);
+        undoRedo.undoable.subscribe(undoButton::setEnabled);
+
+        Button redoButton = (Button) rootView.findViewById(R.id.button_redo);
         redoButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                redo();
+                undoRedo.redo();
             }
         });
-        redoButton.setEnabled(false);
+        undoRedo.redoable.subscribe(redoButton::setEnabled);
+
         radioGroup = (RadioGroup) rootView.findViewById(R.id.radioGroup);
         radioGroup.check(R.id.circle);
-        tool = CIRCLE;
-
         radioGroup.setOnCheckedChangeListener(new RadioGroup.OnCheckedChangeListener() {
             @Override
             public void onCheckedChanged(RadioGroup group, int checkedId) {
@@ -77,7 +70,7 @@ public class MyFragment extends Fragment {
                 } else if (checkedId == R.id.square) {
                     tool = SQUARE;
                 } else {
-                    tool = ERASURE;
+                    tool = ERASER;
                 }
             }
         });
@@ -85,10 +78,8 @@ public class MyFragment extends Fragment {
         canvas.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
-                float x = event.getX();
-                float y = event.getY();
-                hotX = (int) x;
-                hotY = (int) y;
+                hotX = (int) event.getX();
+                hotY = (int) event.getY();
                 return false;
             }
         });
@@ -96,100 +87,60 @@ public class MyFragment extends Fragment {
         canvas.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Command command = getCommand(tool, hotX, hotY);
+                Command command = makeCommand(tool, hotX, hotY);
                 if (command != null) {
-                    doCommand(command);
+                    undoRedo.doCommand(command);
                 }
             }
         });
+
+        shapes.addObserver((o, d) -> refresh());
+        refresh();
         return rootView;
     }
 
-    private void doCommand(Command command) {
-        while (commands.size() > position) {
-            commands.remove(position);
+    private void refresh() {
+        canvas.removeAllViews();
+        for (int i = 0; i < shapes.size(); i++) {
+            canvas.addView(createView(shapes.get(i)));
         }
-        commands.add(command);
-        position++;
-        command.execute();
-        undoButton.setEnabled(true);
-        redoButton.setEnabled(false);
     }
 
-    private void undo() {
-        position--;
-        Command command = commands.get(position);
-        command.undo();
-        redoButton.setEnabled(true);
-        if (position == 0)
-            undoButton.setEnabled(false);
+    private View createView(Shape shape) {
+        if (shape instanceof Circle) {
+            Circle circle = (Circle) shape;
+            View v = new View(getActivity());
+            v.setLayoutParams(new FrameLayout.LayoutParams(circle.radius * 2, circle.radius * 2));
+            v.setBackground(getResources().getDrawable(R.drawable.circle));
+            v.setX(circle.x - circle.radius);
+            v.setY(circle.y - circle.radius);
+            return v;
+        } else {
+            Square square = (Square) shape;
+            View v = new View(getActivity());
+            v.setLayoutParams(new FrameLayout.LayoutParams(square.w, square.h));
+            v.setBackground(getResources().getDrawable(R.drawable.square));
+            v.setX(square.x);
+            v.setY(square.y);
+            return v;
+        }
     }
 
-    private void redo() {
-        Command command = commands.get(position);
-        command.execute();
-        position++;
-        undoButton.setEnabled(true);
-        if (position >= commands.size())
-            redoButton.setEnabled(false);
+    private Command makeCommand(int tool, int x, int y) {
+        if (tool == CIRCLE || tool == SQUARE) {
+            return new AddCommand(shapes, createShape(tool, x, y));
+        } else {
+            int index = shapes.hitTest(x, y);
+            if (index == -1) return null;
+            return new RemoveCommand(shapes, index);
+        }
     }
 
-    private Command getCommand(int tool, int x, int y) {
+    private Shape createShape(int tool, int x, int y) {
         if (tool == CIRCLE) {
-            final View v = new View(getActivity().getApplicationContext());
-            v.setLayoutParams(new FrameLayout.LayoutParams(SIZE, SIZE));
-            v.setBackgroundColor(Color.BLUE);
-            v.setX(x - SIZE / 2);
-            v.setY(y - SIZE / 2);
-            return new Command() {
-                @Override
-                public void execute() {
-                    canvas.addView(v);
-                }
-                @Override
-                public void undo() {
-                    canvas.removeView(v);
-                }
-            };
-        } else if (tool == SQUARE) {
-            final View v = new View(getActivity().getApplicationContext());
-            v.setLayoutParams(new FrameLayout.LayoutParams(SIZE, SIZE));
-            v.setBackgroundColor(Color.RED);
-            v.setX(x - SIZE / 2);
-            v.setY(y - SIZE / 2);
-            return new Command() {
-                @Override
-                public void execute() {
-                    canvas.addView(v);
-                }
-                @Override
-                public void undo() {
-                    canvas.removeView(v);
-                }
-            };
-        } else { // erasure
-            int count = canvas.getChildCount();
-            Rect rect = new Rect();
-
-            for (int i = 0; i < count; i++) {
-                final View childAt = canvas.getChildAt(i);
-                childAt.getHitRect(rect);
-                rect.inset(-30, -30);
-                if (rect.contains(x, y)) {
-                    return new Command() {
-                        @Override
-                        public void execute() {
-                            canvas.removeView(childAt);
-                        }
-                        @Override
-                        public void undo() {
-                            canvas.addView(childAt);
-                        }
-                    };
-                }
-            }
-            return null;
+            return new Circle(x, y, SIZE / 2);
+        } else {
+            return new Square(x - SIZE / 2, y - SIZE / 2, SIZE, SIZE);
         }
     }
-
 }
