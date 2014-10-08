@@ -1,0 +1,82 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    tools:context="com.jooyunghan.my2048.MainActivity"
+    >
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textAppearance="@android:style/TextAppearance.Small"
+        android:text="Score"
+        android:id="@+id/textView"
+        android:layout_alignParentTop="true"
+        android:gravity="center_horizontal|top"
+        android:layout_gravity="center_horizontal"
+        android:layout_centerHorizontal="true" />
+
+    <TextView
+        android:id="@+id/score"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="2048"
+        android:textStyle="bold"
+        android:gravity="center"
+        android:textAppearance="@android:style/TextAppearance.Large"
+        android:layout_gravity="center_horizontal"
+        android:layout_centerHorizontal="true"
+        android:layout_below="@+id/textView">
+    </TextView>
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Undo"
+        android:id="@+id/undo"
+        android:src="@android:drawable/ic_menu_revert"
+        android:onClick="undo"
+        android:layout_above="@+id/container"
+        android:layout_alignParentRight="true"
+        android:background="@android:color/transparent"
+        android:textColor="@color/abc_search_url_text_normal" />
+
+    <Button
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Restart"
+        android:id="@+id/restart"
+        android:onClick="restart"
+        android:layout_above="@+id/container"
+        android:layout_alignParentLeft="true"
+        android:background="@android:color/transparent"
+        android:textColor="@color/abc_search_url_text_normal" />
+
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:id="@+id/container"
+        android:layout_alignParentLeft="true"
+        android:layout_alignParentRight="true"
+        android:layout_alignParentBottom="true"
+        android:layout_below="@+id/score">
+
+        <FrameLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="#ffafa191"
+            android:layout_alignParentTop="false"
+            android:layout_marginTop="0dp"
+            android:id="@+id/container2"
+            android:layout_alignParentStart="false"
+            android:layout_alignParentEnd="false"
+            android:layout_centerInParent="true">
+        </FrameLayout>
+    </RelativeLayout>
+
+
+</RelativeLayout>
