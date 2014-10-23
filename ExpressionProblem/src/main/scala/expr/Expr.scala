@@ -47,13 +47,12 @@ sealed trait Expr {
 
   def simplify(): Expr = this match {
     case BinaryOperator(op, left, right) => {
-      val (l, r) = (left.simplify, right.simplify)
-      (op, left, right) match {
-        case ('+', Value(0.0), right) => right
-        case ('+', left, Value(0.0)) => left
-        case ('*', Value(1.0), right) => right
-        case ('*', Value(0.0), right) => Value(0.0)
-        case _ => BinaryOperator(op, l, r)
+      BinaryOperator(op, left.simplify, right.simplify) match {
+        case BinaryOperator('+', Value(0.0), right) => right
+        case BinaryOperator('+', left, Value(0.0)) => left
+        case BinaryOperator('*', Value(1.0), right) => right
+        case BinaryOperator('*', Value(0.0), right) => Value(0.0)
+        case e => e
       }
     }
     case e => e

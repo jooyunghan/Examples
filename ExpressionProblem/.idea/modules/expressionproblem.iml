@@ -5,7 +5,6 @@
       <configuration>
         <option name="compilerLibraryLevel" value="Project" />
         <option name="compilerLibraryName" value="SBT:: scala-compiler-bundle:2.10.4" />
-        <option name="compilerOptions" value="-feature" />
         <option name="languageLevel" value="Scala 2.11" />
       </configuration>
     </facet>
@@ -28,7 +27,7 @@
       <excludeFolder url="file://$MODULE_DIR$/../../target/resolution-cache" />
       <excludeFolder url="file://$MODULE_DIR$/../../target/streams" />
     </content>
-    <orderEntry type="jdk" jdkName="1.7" jdkType="JavaSDK" />
+    <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="library" name="SBT: org.scala-lang:scala-library:2.10.4" level="project" />
   </component>
